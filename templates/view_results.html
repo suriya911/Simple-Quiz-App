@@ -1,0 +1,36 @@
+<!-- templates/view_results.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <a href="{{ url_for('admin') }}" class="btn btn-secondary mb-3">← Back to Dashboard</a>
+  <h2 class="text-center mb-4">All Quiz Results</h2>
+  <div class="card p-3 shadow">
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered">
+        <thead class="table-primary">
+          <tr>
+            <th>User</th>
+            <th>Score</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if results %}
+            {% for result in results %}
+              <tr>
+                <td>{{ result.username }}</td>
+                <td>{{ result.score }}</td>
+                <td>{{ result.taken_at }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="3" class="text-center">No results available.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
