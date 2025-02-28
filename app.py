@@ -282,4 +282,4 @@ if __name__ == '__main__':
         init_db()
     # Insert default questions if none exist
     insert_default_questions()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
