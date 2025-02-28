@@ -1,12 +1,14 @@
 <!-- templates/result.html -->
 {% extends "base.html" %}
 {% block content %}
-<h2>Your Quiz Results</h2>
-<ul>
-{% for result in results %}
-    <li>Score: {{ result.score }} | Date: {{ result.taken_at }}</li>
-{% else %}
-    <li>No results yet.</li>
-{% endfor %}
+<h2 class="text-center">Your Quiz Results</h2>
+<ul class="list-group">
+  {% for result in results %}
+    <li class="list-group-item">
+      Score: {{ result.score }} | Date: {{ result.taken_at }}
+    </li>
+  {% else %}
+    <li class="list-group-item">No results yet.</li>
+  {% endfor %}
 </ul>
 {% endblock %}

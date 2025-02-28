@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    is_admin INTEGER DEFAULT 0  -- set to 1 for admin users
+    is_admin INTEGER DEFAULT 0  -- 1 for admin, 0 for normal users
 );
 
 CREATE TABLE IF NOT EXISTS questions (
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS questions (
     option_b TEXT NOT NULL,
     option_c TEXT NOT NULL,
     option_d TEXT NOT NULL,
-    correct_option TEXT NOT NULL  -- store: "a", "b", "c", or "d"
+    correct_option TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS results (
@@ -23,3 +23,7 @@ CREATE TABLE IF NOT EXISTS results (
     taken_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
+
+-- Insert default admin user if not exists
+INSERT INTO users (username, password, is_admin)
+SELECT 'admin', 'admin', 1 WHERE NOT EXISTS (SELECT 1 FROM users WHERE username='admin');

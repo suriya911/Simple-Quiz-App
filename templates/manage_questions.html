@@ -1,0 +1,54 @@
+<!-- templates/manage_questions.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-center">Manage Questions</h2>
+  <div class="row">
+    <!-- Add Question Form -->
+    <div class="col-md-6">
+      <h4>Add Question</h4>
+      <form method="post">
+        <div class="mb-2">
+          <label>Question:</label>
+          <input type="text" name="question" class="form-control" required>
+        </div>
+        <div class="mb-2">
+          <label>Option A:</label>
+          <input type="text" name="option_a" class="form-control" required>
+        </div>
+        <div class="mb-2">
+          <label>Option B:</label>
+          <input type="text" name="option_b" class="form-control" required>
+        </div>
+        <div class="mb-2">
+          <label>Option C:</label>
+          <input type="text" name="option_c" class="form-control" required>
+        </div>
+        <div class="mb-2">
+          <label>Option D:</label>
+          <input type="text" name="option_d" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label>Correct Answer (a, b, c, or d):</label>
+          <input type="text" name="correct_option" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success">Add Question</button>
+      </form>
+    </div>
+    <!-- View Questions -->
+    <div class="col-md-6">
+      <h4>Existing Questions</h4>
+      <ul class="list-group">
+        {% for question in questions %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ question.question }}
+            <a href="{{ url_for('delete_question', question_id=question.id) }}" class="btn btn-danger btn-sm">Delete</a>
+          </li>
+        {% else %}
+          <li class="list-group-item">No questions added yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

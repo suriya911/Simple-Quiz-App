@@ -1,0 +1,14 @@
+<!-- templates/view_results.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2 class="text-center">All Quiz Results</h2>
+<ul class="list-group">
+  {% for result in results %}
+    <li class="list-group-item">
+      User: {{ result.username }} | Score: {{ result.score }} | Date: {{ result.taken_at }}
+    </li>
+  {% else %}
+    <li class="list-group-item">No results available.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

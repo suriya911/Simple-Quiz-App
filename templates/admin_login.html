@@ -1,0 +1,16 @@
+<!-- templates/admin_login.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-center">Admin Login</h2>
+  <form method="post" class="card p-3 shadow">
+    <label>Username:</label>
+    <input type="text" name="username" class="form-control mb-3" required>
+    
+    <label>Password:</label>
+    <input type="password" name="password" class="form-control mb-3" required>
+    
+    <button type="submit" class="btn btn-danger w-100">Login</button>
+  </form>
+</div>
+{% endblock %}

@@ -2,30 +2,21 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-    <h2 class="text-center">Admin Dashboard</h2>
-
-    <h3>Manage Questions</h3>
-    <a href="{{ url_for('add_question') }}" class="btn btn-success mb-3">Add New Question</a>
-    <ul class="list-group">
-        {% for question in questions %}
-            <li class="list-group-item d-flex justify-content-between">
-                {{ question.question }}
-                <a href="{{ url_for('delete_question', question_id=question.id) }}" class="btn btn-danger btn-sm">Delete</a>
-            </li>
-        {% else %}
-            <li class="list-group-item">No questions available.</li>
-        {% endfor %}
-    </ul>
-
-    <hr>
-
-    <h3>All User Results</h3>
-    <ul class="list-group">
-        {% for res in results %}
-            <li class="list-group-item">{{ res.username }} scored {{ res.score }} on {{ res.taken_at }}</li>
-        {% else %}
-            <li class="list-group-item">No results found.</li>
-        {% endfor %}
-    </ul>
+  <h2 class="text-center">Admin Dashboard</h2>
+  <div class="d-flex justify-content-center gap-3 mb-4">
+    <a href="{{ url_for('view_results') }}" class="btn btn-primary btn-lg">View Results</a>
+    <a href="{{ url_for('manage_questions') }}" class="btn btn-success btn-lg">Manage Questions</a>
+  </div>
+  <hr>
+  <h4>All Quiz Results</h4>
+  <ul class="list-group">
+    {% for result in results %}
+      <li class="list-group-item">
+        User: {{ result.username }} | Score: {{ result.score }} | Date: {{ result.taken_at }}
+      </li>
+    {% else %}
+      <li class="list-group-item">No quiz results available.</li>
+    {% endfor %}
+  </ul>
 </div>
 {% endblock %}
