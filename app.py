@@ -65,9 +65,11 @@ def init_db():
 # ---------------------------
 @app.route('/')
 def index():
-    if 'user_id' in session:
-        return redirect(url_for('quiz'))
-    return redirect(url_for('login'))
+    return redirect(url_for('home'))
+
+@app.route('/home')
+def home():
+    return render_template('home.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

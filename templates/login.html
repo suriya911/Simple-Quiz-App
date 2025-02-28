@@ -1,16 +1,41 @@
 <!-- templates/login.html -->
 {% extends "base.html" %}
 {% block content %}
-<h2 class="text-center">User Login</h2>
-<form method="post" class="card p-3 shadow">
-  <div class="mb-3">
-    <label>Username:</label>
-    <input type="text" name="username" class="form-control" required>
+<!-- Back to Home button outside the card -->
+<div class="container mt-4">
+  <a href="{{ url_for('home') }}" class="btn btn-secondary">← Back to Home</a>
+</div>
+
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+  <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+    <h2 class="card-title text-center mb-4">User Login</h2>
+    <form method="post">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username:</label>
+        <input type="text" name="username" id="username" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password:</label>
+        <div class="input-group">
+          <input type="password" name="password" id="password" class="form-control" required>
+          <button class="btn btn-outline-secondary" type="button" id="togglePasswordLogin">Show</button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+    <div class="text-center mt-3">
+      <p>New user? <a href="{{ url_for('register') }}">Register here</a></p>
+    </div>
   </div>
-  <div class="mb-3">
-    <label>Password:</label>
-    <input type="password" name="password" class="form-control" required>
-  </div>
-  <button type="submit" class="btn btn-primary w-100">Login</button>
-</form>
+</div>
+
+<script>
+  const togglePasswordLogin = document.querySelector('#togglePasswordLogin');
+  const passwordLogin = document.querySelector('#password');
+  togglePasswordLogin.addEventListener('click', function () {
+    const type = passwordLogin.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordLogin.setAttribute('type', type);
+    this.textContent = type === 'password' ? 'Show' : 'Hide';
+  });
+</script>
 {% endblock %}

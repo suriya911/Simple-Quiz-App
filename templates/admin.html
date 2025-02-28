@@ -1,22 +1,14 @@
 <!-- templates/admin.html -->
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-  <h2 class="text-center">Admin Dashboard</h2>
-  <div class="d-flex justify-content-center gap-3 mb-4">
-    <a href="{{ url_for('view_results') }}" class="btn btn-primary btn-lg">View Results</a>
-    <a href="{{ url_for('manage_questions') }}" class="btn btn-success btn-lg">Manage Questions</a>
+<div class="container mt-5">
+  <div class="text-center">
+    <h1 class="display-4 mb-4 animate__animated animate__fadeInDown">Admin Dashboard</h1>
+    <p class="lead animate__animated animate__fadeInUp">Manage your quiz application with ease</p>
   </div>
-  <hr>
-  <h4>All Quiz Results</h4>
-  <ul class="list-group">
-    {% for result in results %}
-      <li class="list-group-item">
-        User: {{ result.username }} | Score: {{ result.score }} | Date: {{ result.taken_at }}
-      </li>
-    {% else %}
-      <li class="list-group-item">No quiz results available.</li>
-    {% endfor %}
-  </ul>
+  <div class="d-flex justify-content-center gap-5 mt-5">
+    <a href="{{ url_for('view_results') }}" class="btn btn-primary btn-lg animate__animated animate__pulse animate__infinite">View Results</a>
+    <a href="{{ url_for('manage_questions') }}" class="btn btn-success btn-lg animate__animated animate__pulse animate__infinite">Manage Questions</a>
+  </div>
 </div>
 {% endblock %}
