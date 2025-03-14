@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 130px);">
+  <div class="card p-5 shadow" style="max-width: 600px; width: 100%;">
+    <h2 class="text-center mb-4 greeting">
+      {{ greeting }}, {{ session.username }}!
+    </h2>
+    <p class="text-center lead">Ready for your next challenge? Choose an option below to continue:</p>
+    <div class="d-flex justify-content-center mt-4">
+      <a href="{{ url_for('view_results') }}" class="btn btn-primary btn-lg mx-3">View Previous Results</a>
+      <a href="{{ url_for('quiz') }}" class="btn btn-success btn-lg mx-3">Start New Test</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

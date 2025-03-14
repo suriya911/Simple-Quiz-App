@@ -1,0 +1,245 @@
+/* --------------------------------------
+   Global Variables & General Styles
+----------------------------------------- */
+:root {
+  /* Header Gradient: From bright red to royal purple */
+  --header-gradient: linear-gradient(90deg, #FF0000, #E60073, #AD0E8D, #663399);
+  
+  /* Footer: Solid blue */
+  --footer-blue: #3498db;
+  
+  /* Text & background defaults */
+  --text-color: #2c3e50;
+  --body-bg-gradient: linear-gradient(135deg, #e0f7ff, #e0ffe0);
+}
+
+body {
+  background: var(--body-bg-gradient);
+  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding-top: 70px;    /* Space for fixed navbar */
+  padding-bottom: 60px; /* Space for fixed footer */
+}
+
+/* --------------------------------------
+ Navbar (Header) Styles
+----------------------------------------- */
+.navbar {
+  background: var(--header-gradient);
+  border-bottom: 2px solid var(--text-color);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+}
+.navbar-brand,
+.nav-link {
+  color: #ffffff !important;
+}
+.nav-link:hover {
+  color: #f0f0f0 !important;
+}
+
+/* --------------------------------------
+ Footer Styles
+----------------------------------------- */
+.footer {
+  background: var(--footer-blue);
+  color: #ffffff;
+  text-align: center;
+  padding: 10px 0;
+  border-top: 2px solid var(--text-color);
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+}
+.footer p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* --------------------------------------
+ Logo Styles (Retaining the Original Colors)
+----------------------------------------- */
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+.logo-icon {
+  font-size: 2.5rem;
+  margin-right: 0.5rem;
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.logo-text {
+  font-size: 2rem;
+  font-weight: bold;
+  /* Retaining the old logo gradient: blue to a lighter blue */
+  background: linear-gradient(90deg, #8A2BE2, #3498db);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* --------------------------------------
+ Custom Button Styles for Header
+----------------------------------------- */
+.btn-userlogin {
+  background-color: #27ae60;  /* Green */
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 5px;
+  margin: 0 0.5rem;
+  text-decoration: none;
+}
+.btn-userlogin:hover {
+  background-color: #219150;
+}
+.btn-register {
+  background-color: #3498db;  /* Blue */
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 5px;
+  margin: 0 0.5rem;
+  text-decoration: none;
+}
+.btn-register:hover {
+  background-color: #2980b9;
+}
+.btn-admin {
+  background-color: #e74c3c;  /* Red */
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 5px;
+  margin: 0 0.5rem;
+  text-decoration: none;
+}
+.btn-admin:hover {
+  background-color: #c0392b;
+}
+.btn-logout {
+  background-color: #7f8c8d;
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 5px;
+  margin: 0 0.5rem;
+  text-decoration: none;
+}
+.btn-logout:hover {
+  background-color: #707b7c;
+}
+
+/* --------------------------------------
+ Card (Quiz App) Styles
+----------------------------------------- */
+.card {
+  background-color: #f8f8ff;
+  border: 2px solid #3498db;
+  border-radius: 10px;
+  color: var(--text-color);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+/* --------------------------------------
+ Home Container Styles (for quiz and home pages)
+----------------------------------------- */
+.home-container {
+  height: calc(100vh - 130px); /* Exactly fill viewport minus header & footer */
+  overflow: hidden; /* Fixed page; no scrolling */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.home-container .logo-container {
+  transform: scale(1.5);
+}
+.home-title {
+  font-size: 4rem;
+  font-weight: bold;
+  color: var(--text-color);
+}
+.home-subtitle {
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+/* --------------------------------------
+ Glow Button with Purple Sparkling Halo on Hover (Outside the Button)
+----------------------------------------- */
+.glow-button {
+  position: relative;
+  z-index: 0;
+}
+.glow-button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(138,43,226,0.8) 0%, transparent 70%);
+  filter: blur(15px);
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.glow-button:hover::before {
+  opacity: 1;
+  animation: spark 2s infinite;
+}
+@keyframes spark {
+  0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+  }
+  50% {
+      transform: translate(-50%, -50%) scale(1.2);
+      opacity: 0.7;
+  }
+  100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+  }
+}
+
+/* Scrollable container for the All Quiz Results table */
+.scrollable-table {
+    max-height: 300px;  /* Adjust the height as needed (approx. 6-7 rows) */
+    overflow-y: auto;
+}
+
+/* Scrollable container for Existing Questions */
+.scrollable-questions {
+  max-height: 700px;  /* Adjust the height as needed to show approx. 15 rows */
+  overflow-y: auto;
+}
+
+/* Style for dynamic greeting on user dashboard */
+.greeting {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #8A2BE2; /* A nice purple shade */
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}

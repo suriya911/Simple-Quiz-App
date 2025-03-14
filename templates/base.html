@@ -1,4 +1,3 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,55 +6,54 @@
   <title>Quiz App</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Animate.css for animations -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <style>
-    /* Custom styling for the Quiz App logo */
-    .navbar-brand {
-      font-family: 'Comic Sans MS', cursive, sans-serif; /* You can choose any font */
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #fff !important;
-      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-      transition: color 0.3s ease;
-    }
-    .navbar-brand:hover {
-      color: #ffd700 !important;
-      text-decoration: none;
-    }
-  </style>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
     <div class="container">
-      <!-- Text-based logo that links back to the home page -->
-      <a class="navbar-brand" href="{{ url_for('home') }}">QuizApp</a>
+      {% if session.get('user_id') %}
+        {% if session.get('is_admin') %}
+          <a class="navbar-brand" href="{{ url_for('admin') }}">
+            {% include 'logo.html' %}
+          </a>
+        {% else %}
+          <a class="navbar-brand" href="{{ url_for('user_dashboard') }}">
+            {% include 'logo.html' %}
+          </a>
+        {% endif %}
+      {% else %}
+          <a class="navbar-brand" href="{{ url_for('home') }}">
+            {% include 'logo.html' %}
+          </a>
+      {% endif %}
       <div class="d-flex">
         {% if session.get('user_id') %}
-          <a class="btn btn-light btn-sm mx-2" href="{{ url_for('logout') }}">Logout</a>
+          <a class="btn btn-logout" href="{{ url_for('logout') }}">Logout</a>
         {% else %}
-          <a class="btn btn-light btn-sm mx-2" href="{{ url_for('login') }}">User Login</a>
-          <a class="btn btn-warning btn-sm mx-2" href="{{ url_for('register') }}">Register</a>
-          <a class="btn btn-danger btn-sm mx-2" href="{{ url_for('admin_login') }}">Admin Login</a>
+          <a class="btn btn-userlogin" href="{{ url_for('login') }}">User Login</a>
+          <a class="btn btn-register" href="{{ url_for('register') }}">Register</a>
+          <a class="btn btn-admin" href="{{ url_for('admin_login') }}">Admin Login</a>
         {% endif %}
       </div>
     </div>
   </nav>
-
-  <div class="container mt-4">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="alert alert-info">
-          {% for category, message in messages %}
-            <p>{{ message }}</p>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+  
+  <!-- Main Content -->
+  <div class="container mt-4" id="main-container">
     {% block content %}{% endblock %}
   </div>
-
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2025 Quiz App. All rights reserved by Suriya.</p>
+    </div>
+  </footer>
+  
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

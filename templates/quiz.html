@@ -1,37 +1,80 @@
-<!-- templates/quiz.html -->
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-  <h2 class="text-center">Take the Quiz</h2>
-  <form method="post">
-    {% if questions %}
-      {% for question in questions %}
-        <div class="card my-3">
-          <div class="card-body">
-            <h5 class="card-title">{{ loop.index }}. {{ question.question }}</h5>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="a" required>
-              <label class="form-check-label">{{ question.option_a }}</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="b">
-              <label class="form-check-label">{{ question.option_b }}</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="c">
-              <label class="form-check-label">{{ question.option_c }}</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="d">
-              <label class="form-check-label">{{ question.option_d }}</label>
+  <!-- Back Button -->
+  <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary mb-3">← Back to Dashboard</a>
+
+  <h2 class="text-center mb-3">Take the Quiz</h2>
+  
+  <!-- Timer Display -->
+  <div class="alert alert-warning text-center">
+    <strong>Time Left:</strong> <span id="timerDisplay">05:00</span>
+  </div>
+  
+  <!-- Quiz Form -->
+  <form id="quizForm" method="post">
+    <div class="row">
+      <!-- First Column: Questions 1–10 -->
+      <div class="col-md-6">
+        {% for question in questions[0:10] %}
+          <div class="card my-3">
+            <div class="card-body">
+              <h5 class="card-title">{{ loop.index }}. {{ question.question }}</h5>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="a" required>
+                <label class="form-check-label">{{ question.option_a }}</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="b">
+                <label class="form-check-label">{{ question.option_b }}</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="c">
+                <label class="form-check-label">{{ question.option_c }}</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="d">
+                <label class="form-check-label">{{ question.option_d }}</label>
+              </div>
             </div>
           </div>
-        </div>
-      {% endfor %}
-      <button type="submit" class="btn btn-primary w-100">Submit Quiz</button>
-    {% else %}
-      <p class="text-danger">No questions available. Please contact the admin.</p>
-    {% endif %}
+        {% endfor %}
+      </div>
+      
+      <!-- Second Column: Questions 11–20 -->
+      <div class="col-md-6">
+        {% for question in questions[10:20] %}
+          <div class="card my-3">
+            <div class="card-body">
+              <h5 class="card-title">{{ loop.index + 10 }}. {{ question.question }}</h5>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="a" required>
+                <label class="form-check-label">{{ question.option_a }}</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="b">
+                <label class="form-check-label">{{ question.option_b }}</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="c">
+                <label class="form-check-label">{{ question.option_c }}</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="answer_{{ question.id }}" value="d">
+                <label class="form-check-label">{{ question.option_d }}</label>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary w-100 mb-3">Submit Quiz</button>
   </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 {% endblock %}

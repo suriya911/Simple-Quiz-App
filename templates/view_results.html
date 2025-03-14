@@ -1,36 +1,107 @@
-<!-- templates/view_results.html -->
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
-  <a href="{{ url_for('admin') }}" class="btn btn-secondary mb-3">← Back to Dashboard</a>
-  <h2 class="text-center mb-4">All Quiz Results</h2>
-  <div class="card p-3 shadow">
-    <div class="table-responsive">
-      <table class="table table-striped table-bordered">
-        <thead class="table-primary">
-          <tr>
-            <th>User</th>
-            <th>Score</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if results %}
-            {% for result in results %}
+  {% if session.get('is_admin') %}
+    <a href="{{ url_for('admin') }}" class="btn btn-secondary mb-3">← Back to Dashboard</a>
+  {% else %}
+    <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary mb-3">← Back to Dashboard</a>
+  {% endif %}
+  
+  <!-- Top row: Two columns for All Quiz Results and Top 3 Best Performers -->
+  <div class="row">
+    <!-- All Quiz Results Column -->
+    <div class="col-md-6">
+      <h2 class="text-center mb-4">All Quiz Results</h2>
+      <div class="card p-3 shadow mb-4">
+        <!-- Wrap the table in a scrollable container -->
+        <div class="table-responsive scrollable-table">
+          <table class="table table-striped table-bordered">
+            <thead class="table-primary">
               <tr>
-                <td>{{ result.username }}</td>
-                <td>{{ result.score }}</td>
-                <td>{{ result.taken_at }}</td>
+                <th>User</th>
+                <th>Score</th>
+                <th>Time Taken (M)</th>
+                <th>Date</th>
               </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td colspan="3" class="text-center">No results available.</td>
-            </tr>
-          {% endif %}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {% if all_results %}
+                {% for result in all_results %}
+                  <tr>
+                    <td>{{ result.username }}</td>
+                    <td>{{ result.score }}</td>
+                    <td>{{ result.time_taken // 60 }}:{{ '%02d'|format(result.time_taken % 60) }} Mins</td>
+                    <td>{{ result.taken_at }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="4" class="text-center">No results available.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Top 3 Best Performers Column -->
+    <div class="col-md-6">
+      <h2 class="text-center mb-4">Top 5 Best Performers</h2>
+      <div class="card p-3 shadow mb-4">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered">
+            <thead class="table-success">
+              <tr>
+                <th>Rank</th>
+                <th>User</th>
+                <th>Score</th>
+                <th>Time Taken (M)</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if top_performers %}
+                {% for performer in top_performers %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ performer.username }}</td>
+                    <td>{{ performer.score }}</td>
+                    <td>{{ performer.time_taken // 60 }}:{{ '%02d'|format(performer.time_taken % 60) }} Mins</td>
+                    <td>{{ performer.taken_at }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center">No top performers data available.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Combined Histogram + Normal Approximation Line -->
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <h2 class="text-center mb-4">Score Distribution (Histogram + Normal Curve)</h2>
+      <div class="card p-3 shadow mb-4">
+        <canvas id="combinedChart" width="400" height="200"></canvas>
+      </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Include Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Pass graph_data from backend to a global JS variable -->
+<script>
+  const graphData = JSON.parse('{{ graph_data | tojson | safe }}');
+</script>
+<!-- Include our custom script.js -->
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 {% endblock %}

@@ -1,14 +1,13 @@
-<!-- templates/home.html -->
 {% extends "base.html" %}
 {% block content %}
-<div class="container text-center mt-5">
-  <!-- Text-based logo using inline CSS for demonstration -->
-  <div class="animate__animated animate__fadeInDown" style="font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 4rem; font-weight: bold; color: #007bff; text-shadow: 2px 2px 5px rgba(0,0,0,0.3);">
-    QuizApp
+<div class="home-container d-flex flex-column justify-content-center align-items-center text-center">
+  <!-- Reuse the logo from your partial -->
+  <div class="mb-4">
+    {% include 'logo.html' %}
   </div>
-  <h1 class="display-3 mt-4 animate__animated animate__fadeInDown">Simple Quiz App</h1>
-  <p class="lead animate__animated animate__fadeInUp">Challenge yourself with fun quizzes and track your progress!</p>
-  <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg mt-4 animate__animated animate__pulse animate__infinite">
+  <h1 class="home-title">Simple Quiz App</h1>
+  <p class="home-subtitle mt-3">Challenge yourself with fun quizzes and track your progress!</p>
+  <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg mt-4 glow-button">
     Start Quiz
   </a>
 </div>

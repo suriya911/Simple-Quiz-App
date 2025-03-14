@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS results (
     user_id INTEGER,
     score INTEGER,
     taken_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    time_taken INTEGER,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
