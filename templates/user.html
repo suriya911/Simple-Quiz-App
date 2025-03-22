@@ -7,9 +7,19 @@
     </h2>
     <p class="text-center lead">Ready for your next challenge? Choose an option below to continue:</p>
     <div class="d-flex justify-content-center mt-4">
-      <a href="{{ url_for('view_results') }}" class="btn btn-primary btn-lg mx-3">View Previous Results</a>
-      <a href="{{ url_for('quiz') }}" class="btn btn-success btn-lg mx-3">Start New Test</a>
+      {% if session.get('quiz_questions') %}
+      <a id="resumeTestBtn" href="{{ url_for('quiz') }}?action=resume" class="btn btn-warning btn-lg mx-2">Resume Test</a>
+      {% endif %}
+      <a id="startNewTestBtn" href="{{ url_for('quiz') }}?action=new" class="btn btn-success btn-lg mx-2">Start New Test</a>
+      <a href="{{ url_for('view_results') }}" class="btn btn-primary btn-lg mx-2">View Previous Results</a>
     </div>
   </div>
 </div>
+{% block scripts %}
+<script>
+  if (localStorage.getItem("testStartTime") && localStorage.getItem("quizState")) {
+      document.getElementById("resumeTestBtn").style.display = "inline-block";
+  }
+</script>
+{% endblock %}
 {% endblock %}

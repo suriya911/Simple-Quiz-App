@@ -1,14 +1,8 @@
-/* --------------------------------------
-   Global Variables & General Styles
------------------------------------------ */
 :root {
-  /* Header Gradient: From bright red to royal purple */
   --header-gradient: linear-gradient(90deg, #FF0000, #E60073, #AD0E8D, #663399);
   
-  /* Footer: Solid blue */
   --footer-blue: #3498db;
   
-  /* Text & background defaults */
   --text-color: #2c3e50;
   --body-bg-gradient: linear-gradient(135deg, #e0f7ff, #e0ffe0);
 }
@@ -18,13 +12,10 @@ body {
   color: var(--text-color);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  padding-top: 70px;    /* Space for fixed navbar */
-  padding-bottom: 60px; /* Space for fixed footer */
+  padding-top: 70px;   
+  padding-bottom: 60px; 
 }
 
-/* --------------------------------------
- Navbar (Header) Styles
------------------------------------------ */
 .navbar {
   background: var(--header-gradient);
   border-bottom: 2px solid var(--text-color);
@@ -44,9 +35,6 @@ body {
   color: #f0f0f0 !important;
 }
 
-/* --------------------------------------
- Footer Styles
------------------------------------------ */
 .footer {
   background: var(--footer-blue);
   color: #ffffff;
@@ -66,9 +54,6 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* --------------------------------------
- Logo Styles (Retaining the Original Colors)
------------------------------------------ */
 .logo-container {
   display: flex;
   align-items: center;
@@ -85,17 +70,12 @@ body {
 .logo-text {
   font-size: 2rem;
   font-weight: bold;
-  /* Retaining the old logo gradient: blue to a lighter blue */
   background: linear-gradient(90deg, #8A2BE2, #3498db);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
-/* --------------------------------------
- Custom Button Styles for Header
------------------------------------------ */
 .btn-userlogin {
-  background-color: #27ae60;  /* Green */
+  background-color: #27ae60;  
   color: #fff;
   font-size: 1.1rem;
   padding: 0.75rem 1.25rem;
@@ -108,7 +88,7 @@ body {
   background-color: #219150;
 }
 .btn-register {
-  background-color: #3498db;  /* Blue */
+  background-color: #3498db;  
   color: #fff;
   font-size: 1.1rem;
   padding: 0.75rem 1.25rem;
@@ -121,7 +101,7 @@ body {
   background-color: #2980b9;
 }
 .btn-admin {
-  background-color: #e74c3c;  /* Red */
+  background-color: #e74c3c;
   color: #fff;
   font-size: 1.1rem;
   padding: 0.75rem 1.25rem;
@@ -147,9 +127,6 @@ body {
   background-color: #707b7c;
 }
 
-/* --------------------------------------
- Card (Quiz App) Styles
------------------------------------------ */
 .card {
   background-color: #f8f8ff;
   border: 2px solid #3498db;
@@ -160,12 +137,9 @@ body {
   max-width: 600px;
 }
 
-/* --------------------------------------
- Home Container Styles (for quiz and home pages)
------------------------------------------ */
 .home-container {
-  height: calc(100vh - 130px); /* Exactly fill viewport minus header & footer */
-  overflow: hidden; /* Fixed page; no scrolling */
+  height: calc(100vh - 130px); 
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -184,9 +158,6 @@ body {
   color: var(--text-color);
 }
 
-/* --------------------------------------
- Glow Button with Purple Sparkling Halo on Hover (Outside the Button)
------------------------------------------ */
 .glow-button {
   position: relative;
   z-index: 0;
@@ -225,21 +196,18 @@ body {
   }
 }
 
-/* Scrollable container for the All Quiz Results table */
 .scrollable-table {
-    max-height: 300px;  /* Adjust the height as needed (approx. 6-7 rows) */
+    max-height: 300px;  
     overflow-y: auto;
 }
 
-/* Scrollable container for Existing Questions */
 .scrollable-questions {
-  max-height: 700px;  /* Adjust the height as needed to show approx. 15 rows */
+  max-height: 700px;  
   overflow-y: auto;
 }
 
-/* Style for dynamic greeting on user dashboard */
 .greeting {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #8A2BE2; /* A nice purple shade */
+  color: #8A2BE2;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }

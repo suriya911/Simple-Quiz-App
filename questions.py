@@ -1,4 +1,4 @@
-# questions.py
+
 import sqlite3
 
 def insert_default_questions():
@@ -8,7 +8,7 @@ def insert_default_questions():
     conn = sqlite3.connect('quiz.db')
     cursor = conn.cursor()
 
-    # Check if any questions exist
+
     cursor.execute("SELECT COUNT(*) FROM questions")
     count = cursor.fetchone()[0]
 
@@ -24,7 +24,6 @@ def insert_default_questions():
             ("Which country invented pizza?", "France", "Italy", "USA", "India", "b"),
             ("How many continents are there?", "5", "6", "7", "8", "c"),
             ("What is the boiling point of water?", "90°C", "100°C", "110°C", "120°C", "b"),
-            # More questions ...
             ("What is the capital of Japan?", "Beijing", "Seoul", "Tokyo", "Bangkok", "c"),
             ("How many sides does a hexagon have?", "5", "6", "7", "8", "b"),
             ("Which ocean is the largest?", "Atlantic", "Indian", "Arctic", "Pacific", "d"),

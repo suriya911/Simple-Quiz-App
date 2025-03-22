@@ -61,23 +61,44 @@ python app.py
 ## 📂 Project Structure
 
 ```
-Simple-Quiz-App/
-│
-├── app.py                 # Main Flask application
-├── schema.sql             # Database schema
-├── questions.py           # Inserts default questions
-├── quiz.db                # SQLite database
-├── requirements.txt       # Required Python packages
-└── templates/             # HTML templates
-    ├── base.html
-    ├── home.html
-    ├── login.html
-    ├── register.html
-    ├── quiz.html
-    ├── result.html
-    ├── admin.html
-    ├── view_results.html
-    ├── manage_questions.html
+SIMPLE-QUIZ-APP/
+|
+├── __pycache__/                       # Python cache files
+|
+├── .github/workflows/                # GitHub Actions workflows
+|   └── deploy.yml                    # Deployment configuration
+|
+├── instance/                         # Instance folder for database
+|   └── session.db                    # Session database
+|
+├── static/                           # Static files (CSS, JS)
+|   ├── css/
+|   |   └── styles.css                # Stylesheet
+|   |
+|   └── js/
+|       └── scripts.js                # JavaScript file
+|
+├── templates/                        # HTML templates
+|   ├── admin_login.html              # Admin login page
+|   ├── admin.html                    # Admin dashboard
+|   ├── base.html                     # Base template
+|   ├── home.html                     # Home page
+|   ├── login.html                    # User login page
+|   ├── logo.html                     # Logo template/component
+|   ├── manage_questions.html        # Admin question management
+|   ├── quiz.html                     # Quiz page
+|   ├── register.html                 # User registration page
+|   ├── user.html                     # User dashboard
+|   └── view_results.html            # Results viewing page
+|
+├── app.py                            # Main Flask application
+├── Procfile                          # Process file for deployment
+├── questions.py                      # Script to insert questions
+├── quiz.db                           # Quiz database
+├── README.md                         # Project documentation
+├── requirements.txt                  # Python dependencies
+└── schema.sql
+
 ```
 
 ## ⚙️ CI/CD Pipeline (GitHub Actions & Render)

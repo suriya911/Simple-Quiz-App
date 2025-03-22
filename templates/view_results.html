@@ -6,14 +6,11 @@
   {% else %}
     <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary mb-3">← Back to Dashboard</a>
   {% endif %}
-  
-  <!-- Top row: Two columns for All Quiz Results and Top 3 Best Performers -->
+
   <div class="row">
-    <!-- All Quiz Results Column -->
     <div class="col-md-6">
       <h2 class="text-center mb-4">All Quiz Results</h2>
       <div class="card p-3 shadow mb-4">
-        <!-- Wrap the table in a scrollable container -->
         <div class="table-responsive scrollable-table">
           <table class="table table-striped table-bordered">
             <thead class="table-primary">
@@ -31,7 +28,7 @@
                     <td>{{ result.username }}</td>
                     <td>{{ result.score }}</td>
                     <td>{{ result.time_taken // 60 }}:{{ '%02d'|format(result.time_taken % 60) }} Mins</td>
-                    <td>{{ result.taken_at }}</td>
+                    <td>{{ result.taken_at | format_date }}</td>
                   </tr>
                 {% endfor %}
               {% else %}
@@ -44,8 +41,7 @@
         </div>
       </div>
     </div>
-    
-    <!-- Top 3 Best Performers Column -->
+
     <div class="col-md-6">
       <h2 class="text-center mb-4">Top 5 Best Performers</h2>
       <div class="card p-3 shadow mb-4">
@@ -68,7 +64,7 @@
                     <td>{{ performer.username }}</td>
                     <td>{{ performer.score }}</td>
                     <td>{{ performer.time_taken // 60 }}:{{ '%02d'|format(performer.time_taken % 60) }} Mins</td>
-                    <td>{{ performer.taken_at }}</td>
+                    <td>{{ performer.taken_at | format_date }}</td>
                   </tr>
                 {% endfor %}
               {% else %}
@@ -82,8 +78,7 @@
       </div>
     </div>
   </div>
-  
-  <!-- Combined Histogram + Normal Approximation Line -->
+
   <div class="row">
     <div class="col-md-8 offset-md-2">
       <h2 class="text-center mb-4">Score Distribution (Histogram + Normal Curve)</h2>
@@ -96,12 +91,9 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Include Chart.js from CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Pass graph_data from backend to a global JS variable -->
 <script>
   const graphData = JSON.parse('{{ graph_data | tojson | safe }}');
 </script>
-<!-- Include our custom script.js -->
 <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 {% endblock %}

@@ -1,5 +1,4 @@
-# app.py
-from flask import Flask, render_template, request, redirect, url_for, session, g, flash
+from flask import Flask, render_template, request, redirect, url_for, session, g, flash, jsonify
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from questions import insert_default_questions
@@ -9,51 +8,47 @@ import datetime
 import time
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Replace with a secure secret key in production
+app.secret_key = 'your_secret_key'
 DATABASE = 'quiz.db'
 
-# Configure Flask-Session to use SQLAlchemy for persistent sessions
 app.config['SESSION_TYPE'] = 'sqlalchemy'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///session.db'  # Separate session storage
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///session.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize SQLAlchemy for session management
 db = SQLAlchemy(app)
 app.config['SESSION_SQLALCHEMY'] = db
 
-# Initialize Session
 Session(app)
 
+# -------------------
+# Jinja Filter to format date
+# -------------------
+@app.template_filter('format_date')
+def format_date(value, format='%d-%m-%Y %I:%M:%S %p'):
+    try:
+        # Assuming the stored value is in the format 'YYYY-MM-DD HH:MM:SS'
+        dt = datetime.datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+        return dt.strftime(format)
+    except Exception as e:
+        print("Date formatting error:", e)
+        return value
 
-# ---------------------------
-# Database Helpers
-# ---------------------------
 def get_db():
-    """
-    Helper function to get a SQLite database connection.
-    Uses Flask's g object to store the connection per request.
-    """
     database = getattr(g, '_database', None)
     if database is None:
         database = g._database = sqlite3.connect(DATABASE)
-        database.row_factory = sqlite3.Row  # Allow accessing columns by name
+        database.row_factory = sqlite3.Row
     return database
 
 @app.teardown_appcontext
 def close_connection(exception):
-    """
-    Closes the database connection at the end of the request.
-    """
     database = getattr(g, '_database', None)
     if database is not None:
         database.close()
 
 def init_db():
-    """
-    Initializes the database using the schema.sql file.
-    """
     with app.app_context():
         database = get_db()
         with open('schema.sql', mode='r') as f:
@@ -61,10 +56,6 @@ def init_db():
         database.commit()
         print("Initialized the database.")
 
-
-# ---------------------------
-# Routes for All Users
-# ---------------------------
 @app.route('/')
 def index():
     return redirect(url_for('home'))
@@ -75,17 +66,12 @@ def home():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """
-    User registration. Prevents registering as 'admin'.
-    """
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
         if username.lower() == "admin":
             flash("Cannot register as admin!", "danger")
             return redirect(url_for('register'))
-
         db_conn = get_db()
         try:
             db_conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
@@ -98,9 +84,6 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """
-    User login route.
-    """
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -112,7 +95,10 @@ def login():
             session['username'] = user['username']
             session['is_admin'] = user['is_admin']
             flash("Logged in successfully", "success")
-            return redirect(url_for('user_dashboard'))
+            if user['is_admin']:
+                return redirect(url_for('admin'))
+            else:
+                return redirect(url_for('user_dashboard'))
         else:
             flash("Invalid credentials", "danger")
     return render_template('login.html')
@@ -124,8 +110,6 @@ def user_dashboard():
         return redirect(url_for('login'))
     if session.get('is_admin'):
         return redirect(url_for('admin'))
-    
-    # Get the current hour and decide on the greeting
     current_hour = datetime.datetime.now().hour
     if current_hour < 12:
         greeting = "Good Morning"
@@ -133,69 +117,42 @@ def user_dashboard():
         greeting = "Good Afternoon"
     else:
         greeting = "Good Evening"
-    
     return render_template("user.html", greeting=greeting)
-
 
 @app.route('/logout')
 def logout():
-    """
-    Logs out the user and clears the session.
-    """
     session.clear()
     flash("Logged out successfully", "success")
     return redirect(url_for('home'))
 
-# @app.route('/quiz', methods=['GET', 'POST'])
-# def quiz():
-#     """
-#     Displays a quiz of 20 random questions and processes the submitted answers.
-#     """
-#     if 'user_id' not in session:
-#         flash("Please login first", "warning")
-#         return redirect(url_for('login'))
-#     db_conn = get_db()
-#     if request.method == 'POST':
-#         score = 0
-#         # Evaluate each answer submitted
-#         for key in request.form:
-#             if key.startswith('answer_'):
-#                 q_id = key.split('_')[1]
-#                 user_answer = request.form.get(key)
-#                 cur = db_conn.execute("SELECT correct_option FROM questions WHERE id = ?", (q_id,))
-#                 question = cur.fetchone()
-#                 if question and user_answer == question['correct_option']:
-#                     score += 1
-#         # Save the result
-#         db_conn.execute("INSERT INTO results (user_id, score) VALUES (?, ?)", (session['user_id'], score))
-#         db_conn.commit()
-#         flash(f"You scored {score} out of 20", "info")
-#         return redirect(url_for('result'))
-#     else:
-#         cur = db_conn.execute("SELECT * FROM questions ORDER BY RANDOM() LIMIT 20")
-#         questions = cur.fetchall()
-#         return render_template('quiz.html', questions=questions)
-
 @app.route('/quiz', methods=['GET', 'POST'])
 def quiz():
     if 'user_id' not in session:
-        flash("Please login first", "warning")
-        return redirect(url_for('login'))
-    
+        session['user_id'] = 1
+
     db_conn = get_db()
-    
-    # Example of storing start time in session
+    action = request.args.get('action', 'new')
+    if action == 'new':
+        session.pop('quiz_start_time', None)
+        session.pop('quiz_questions', None)
+        session.pop('quiz_remaining_time', None)
+        session.pop('quiz_score', None)
+        session.pop('quiz_elapsed', None)
+
     if request.method == 'GET':
-        # Start the quiz: store start_time in session
-        session['quiz_start_time'] = time.time()  # time() returns current epoch in seconds
-        # retrieve 20 random questions, etc.
-        questions = db_conn.execute("SELECT * FROM questions ORDER BY RANDOM() LIMIT 20").fetchall()
-        return render_template('quiz.html', questions=questions)
-    
+        if action == 'new' or 'quiz_questions' not in session:
+            cur = db_conn.execute("SELECT * FROM questions ORDER BY RANDOM() LIMIT 20")
+            questions = cur.fetchall()
+            session['quiz_questions'] = [dict(q) for q in questions]
+            session['quiz_remaining_time'] = 300  # total duration in seconds
+            session['quiz_start_time'] = time.time()
+        else:
+            questions = session.get('quiz_questions')
+        return render_template('quiz.html',
+                               questions=questions,
+                               remaining_time=session.get('quiz_remaining_time', 300))
     else:
-        # Post: user has submitted the quiz
         score = 0
-        # Evaluate each answer
         for key, value in request.form.items():
             if key.startswith('answer_'):
                 q_id = key.split('_')[1]
@@ -204,50 +161,63 @@ def quiz():
                 question = cur.fetchone()
                 if question and user_answer == question['correct_option']:
                     score += 1
-        
-        # Calculate time taken
-        quiz_start_time = session.get('quiz_start_time')
-        if quiz_start_time:
-            elapsed_seconds = int(time.time() - quiz_start_time)
-        else:
-            elapsed_seconds = 0  # fallback if not stored
-        
-        # Insert result
-        db_conn.execute(
-            "INSERT INTO results (user_id, score, time_taken) VALUES (?, ?, ?)",
-            (session['user_id'], score, elapsed_seconds)
-        )
-        db_conn.commit()
-        
-        # Clear the quiz start time
+
+        total_duration = 300  # total quiz duration in seconds
+
+        # Get remaining time from the form; fallback to session if not provided.
+        remaining_str = request.form.get('remaining_time')
+        try:
+            remaining = int(remaining_str) if remaining_str is not None else session.get('quiz_remaining_time', total_duration)
+        except ValueError:
+            remaining = total_duration
+
+        quiz_taken_time = total_duration - remaining
+
+        session['quiz_score'] = score
+        session['quiz_elapsed'] = quiz_taken_time
+
+        # Calculate local time for insertion
+        local_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            db_conn.execute(
+                "INSERT INTO results (user_id, score, time_taken, taken_at) VALUES (?, ?, ?, ?)",
+                (session['user_id'], score, quiz_taken_time, local_time)
+            )
+            db_conn.commit()
+            print("Quiz result inserted successfully with local time:", local_time)
+        except Exception as e:
+            print("Error inserting quiz result:", e)
+            return jsonify({'error': 'Failed to store quiz result.'}), 500
+
         session.pop('quiz_start_time', None)
-        
-        flash(f"You scored {score} out of 20. Time taken: {elapsed_seconds} seconds", "info")
-        return redirect(url_for('view_results'))
+        session.pop('quiz_questions', None)
+        session.pop('quiz_remaining_time', None)
+
+        return jsonify({'score': score, 'elapsed_seconds': quiz_taken_time})
 
 
-@app.route('/result')
-def result():
-    """
-    Displays the logged-in user's quiz results.
-    """
-    if 'user_id' not in session:
-        flash("Please login first", "warning")
-        return redirect(url_for('login'))
-    db_conn = get_db()
-    cur = db_conn.execute("SELECT * FROM results WHERE user_id = ? ORDER BY taken_at DESC", (session['user_id'],))
-    results = cur.fetchall()
-    return render_template('result.html', results=results)
+@app.route('/update_quiz_state', methods=['POST'])
+def update_quiz_state():
+    question_id = request.form.get('question_id')
+    answer = request.form.get('answer')
+    if 'quiz_answers' not in session:
+        session['quiz_answers'] = {}
+    session['quiz_answers'][question_id] = answer
+    session.modified = True
+    return '', 204
 
+@app.route('/update_quiz_timer', methods=['POST'])
+def update_quiz_timer():
+    remaining = request.form.get('remaining_time') or request.args.get('remaining_time')
+    try:
+        remaining = int(remaining)
+    except (TypeError, ValueError):
+        remaining = 300
+    session['quiz_remaining_time'] = remaining
+    return '', 204
 
-# ---------------------------
-# Admin Routes
-# ---------------------------
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
-    """
-    Admin login route.
-    """
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -266,9 +236,6 @@ def admin_login():
 
 @app.route('/admin')
 def admin():
-    """
-    Admin dashboard showing all questions and quiz results.
-    """
     if not session.get('is_admin'):
         flash("Admin access required", "danger")
         return redirect(url_for('login'))
@@ -286,9 +253,6 @@ def admin():
 
 @app.route('/manage_questions', methods=['GET', 'POST'])
 def manage_questions():
-    """
-    Admin route to add a new question and view all existing questions.
-    """
     if not session.get('is_admin'):
         flash("Admin access required", "danger")
         return redirect(url_for('login'))
@@ -314,9 +278,6 @@ def manage_questions():
 
 @app.route('/admin/delete_question/<int:question_id>')
 def delete_question(question_id):
-    """
-    Admin route to delete a question.
-    """
     if not session.get('is_admin'):
         flash("Admin access required", "danger")
         return redirect(url_for('login'))
@@ -329,13 +290,12 @@ def delete_question(question_id):
 @app.route('/view_results')
 def view_results():
     db_conn = get_db()
-    
+
     def rows_to_dicts(rows):
         return [dict(row) for row in rows]
-    
+
     if not session.get('is_admin'):
         user_id = session.get('user_id')
-        # All results for current user
         query_all = """
             SELECT r.score, r.taken_at, r.time_taken, u.username 
             FROM results r 
@@ -344,8 +304,7 @@ def view_results():
             ORDER BY r.taken_at DESC
         """
         all_results = rows_to_dicts(db_conn.execute(query_all, (user_id,)).fetchall())
-        
-        # Top performers for current user: using window functions to select the best record per user
+
         top_query = """
             SELECT username, score, time_taken, taken_at FROM (
               SELECT u.username, r.score, r.time_taken, r.taken_at,
@@ -359,8 +318,7 @@ def view_results():
             LIMIT 5
         """
         top_performers = rows_to_dicts(db_conn.execute(top_query, (user_id,)).fetchall())
-        
-        # Graph data for current user
+
         graph_query = """
             SELECT r.score, u.username, r.taken_at 
             FROM results r 
@@ -370,7 +328,6 @@ def view_results():
         """
         graph_data = rows_to_dicts(db_conn.execute(graph_query, (user_id,)).fetchall())
     else:
-        # For admin: all users' results
         query_all = """
             SELECT r.score, r.taken_at, r.time_taken, u.username 
             FROM results r 
@@ -378,7 +335,7 @@ def view_results():
             ORDER BY r.taken_at DESC
         """
         all_results = rows_to_dicts(db_conn.execute(query_all).fetchall())
-        
+
         top_query = """
             SELECT username, score, time_taken, taken_at FROM (
               SELECT u.username, r.score, r.time_taken, r.taken_at,
@@ -391,7 +348,7 @@ def view_results():
             LIMIT 5
         """
         top_performers = rows_to_dicts(db_conn.execute(top_query).fetchall())
-        
+
         graph_query = """
             SELECT r.score, u.username, r.taken_at 
             FROM results r 
@@ -399,22 +356,14 @@ def view_results():
             ORDER BY r.taken_at ASC
         """
         graph_data = rows_to_dicts(db_conn.execute(graph_query).fetchall())
-        
+
     return render_template("view_results.html",
                            all_results=all_results,
                            top_performers=top_performers,
                            graph_data=graph_data)
 
-
-
-
-# ---------------------------
-# Main Entry Point
-# ---------------------------
 if __name__ == '__main__':
-    # Initialize the database if it doesn't exist
     if not os.path.exists(DATABASE):
         init_db()
-    # Insert default questions if none exist
     insert_default_questions()
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)),debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)

@@ -1,4 +1,3 @@
--- schema.sql
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
@@ -20,11 +19,10 @@ CREATE TABLE IF NOT EXISTS results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     score INTEGER,
-    taken_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    taken_at TIMESTAMP,
     time_taken INTEGER,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
--- Insert default admin user if not exists
 INSERT INTO users (username, password, is_admin)
 SELECT 'admin', 'admin', 1 WHERE NOT EXISTS (SELECT 1 FROM users WHERE username='admin');
