@@ -189,6 +189,22 @@ def quiz():
             print("Error inserting quiz result:", e)
             return jsonify({'error': 'Failed to store quiz result.'}), 500
 
+        # --- NEW CODE: Check for duplicate insertion and delete the last inserted duplicate ---
+        cur = db_conn.execute(
+            "SELECT COUNT(*) as cnt FROM results WHERE user_id = ? AND taken_at = ? AND score = ? AND time_taken = ?",
+            (session['user_id'], local_time, score, quiz_taken_time)
+        )
+        cnt = cur.fetchone()['cnt']
+        if cnt > 1:
+            # Delete the duplicate row (assumed to be the one with the highest id)
+            db_conn.execute(
+                "DELETE FROM results WHERE id = (SELECT id FROM results WHERE user_id = ? AND taken_at = ? AND score = ? AND time_taken = ? ORDER BY id DESC LIMIT 1)",
+                (session['user_id'], local_time, score, quiz_taken_time)
+            )
+            db_conn.commit()
+            print("Duplicate quiz result deleted.")
+        # --- END NEW CODE ---
+        
         session.pop('quiz_start_time', None)
         session.pop('quiz_questions', None)
         session.pop('quiz_remaining_time', None)
@@ -294,7 +310,38 @@ def view_results():
     def rows_to_dicts(rows):
         return [dict(row) for row in rows]
 
-    if not session.get('is_admin'):
+    if session.get('is_admin'):
+        # For Admin: Get all results
+        query_all = """
+            SELECT r.score, r.taken_at, r.time_taken, u.username 
+            FROM results r 
+            JOIN users u ON r.user_id = u.id 
+            ORDER BY r.taken_at DESC
+        """
+        all_results = rows_to_dicts(db_conn.execute(query_all).fetchall())
+
+        # For Admin: Get best result (highest score, lowest time) per user (all users)
+        admin_best_query = """
+            SELECT username, score, time_taken, taken_at FROM (
+              SELECT u.username, r.score, r.time_taken, r.taken_at,
+                     ROW_NUMBER() OVER (PARTITION BY u.id ORDER BY r.score DESC, r.time_taken ASC) as rn
+              FROM results r 
+              JOIN users u ON r.user_id = u.id
+            ) sub
+            WHERE rn = 1
+            ORDER BY score DESC, time_taken ASC
+        """
+        top_results = rows_to_dicts(db_conn.execute(admin_best_query).fetchall())
+
+        graph_query = """
+            SELECT r.score, u.username, r.taken_at 
+            FROM results r 
+            JOIN users u ON r.user_id = u.id 
+            ORDER BY r.taken_at ASC
+        """
+        graph_data = rows_to_dicts(db_conn.execute(graph_query).fetchall())
+    else:
+        # For a normal user:
         user_id = session.get('user_id')
         query_all = """
             SELECT r.score, r.taken_at, r.time_taken, u.username 
@@ -305,19 +352,16 @@ def view_results():
         """
         all_results = rows_to_dicts(db_conn.execute(query_all, (user_id,)).fetchall())
 
-        top_query = """
-            SELECT username, score, time_taken, taken_at FROM (
-              SELECT u.username, r.score, r.time_taken, r.taken_at,
-                     ROW_NUMBER() OVER (PARTITION BY u.id ORDER BY r.score DESC, r.time_taken ASC) as rn
-              FROM results r 
-              JOIN users u ON r.user_id = u.id 
-              WHERE u.id = ?
-            ) sub
-            WHERE rn = 1
-            ORDER BY score DESC, time_taken ASC
-            LIMIT 5
+        # For a normal user: Get top 3 results
+        user_top_query = """
+            SELECT u.username, r.score, r.time_taken, r.taken_at
+            FROM results r 
+            JOIN users u ON r.user_id = u.id
+            WHERE u.id = ?
+            ORDER BY r.score DESC, r.time_taken ASC
+            LIMIT 3
         """
-        top_performers = rows_to_dicts(db_conn.execute(top_query, (user_id,)).fetchall())
+        top_results = rows_to_dicts(db_conn.execute(user_top_query, (user_id,)).fetchall())
 
         graph_query = """
             SELECT r.score, u.username, r.taken_at 
@@ -327,40 +371,13 @@ def view_results():
             ORDER BY r.taken_at ASC
         """
         graph_data = rows_to_dicts(db_conn.execute(graph_query, (user_id,)).fetchall())
-    else:
-        query_all = """
-            SELECT r.score, r.taken_at, r.time_taken, u.username 
-            FROM results r 
-            JOIN users u ON r.user_id = u.id 
-            ORDER BY r.taken_at DESC
-        """
-        all_results = rows_to_dicts(db_conn.execute(query_all).fetchall())
-
-        top_query = """
-            SELECT username, score, time_taken, taken_at FROM (
-              SELECT u.username, r.score, r.time_taken, r.taken_at,
-                     ROW_NUMBER() OVER (PARTITION BY u.id ORDER BY r.score DESC, r.time_taken ASC) as rn
-              FROM results r 
-              JOIN users u ON r.user_id = u.id
-            ) sub
-            WHERE rn = 1
-            ORDER BY score DESC, time_taken ASC
-            LIMIT 5
-        """
-        top_performers = rows_to_dicts(db_conn.execute(top_query).fetchall())
-
-        graph_query = """
-            SELECT r.score, u.username, r.taken_at 
-            FROM results r 
-            JOIN users u ON r.user_id = u.id 
-            ORDER BY r.taken_at ASC
-        """
-        graph_data = rows_to_dicts(db_conn.execute(graph_query).fetchall())
 
     return render_template("view_results.html",
                            all_results=all_results,
-                           top_performers=top_performers,
+                           top_results=top_results,
                            graph_data=graph_data)
+
+
 
 if __name__ == '__main__':
     if not os.path.exists(DATABASE):

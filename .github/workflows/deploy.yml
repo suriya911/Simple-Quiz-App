@@ -1,4 +1,4 @@
-name: Deploy to Render
+name: CI/CD Deployment
 
 on:
   push:
@@ -10,65 +10,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-<<<<<<< HEAD
-      # 1. Checkout code
+      # 1. Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Set up Python
-=======
-      # Check out the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Set up Python
->>>>>>> c92daf6 (hosting)
-      - name: Set up Python 3.11
+      # 2. Set up Python (we use Python 3.10 as an example)
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.10"
 
-<<<<<<< HEAD
-      # 3. Install dependencies
-=======
-      # Install dependencies
->>>>>>> c92daf6 (hosting)
+      # 3. Install dependencies and run tests
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-<<<<<<< HEAD
-      # 4. Run tests (if any exist)
       - name: Run tests
         run: |
           pytest || echo "No tests found, continuing..."
         continue-on-error: true
 
-      # 5. Initialize or migrate the database
-      - name: Initialize / Migrate Database
+      # 4. Initialize or migrate the database (if your app requires it)
+      - name: Initialize/Migrate Database
         run: |
           python -c "from app import init_db; init_db()"
 
-      # 6. Trigger a deployment on Render via the API
-=======
-      # Run database initialization/migrations
-      - name: Initialize / Migrate Database
+      # 5. Build the Docker image
+      - name: Build Docker image
         run: |
-          # This calls the init_db function in your app.
-          # Modify this if you use a more robust migration tool.
-          python -c "from app import init_db; init_db()"
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/myapp:latest .
 
-      # Optionally run tests
-      - name: Run tests
+      # 6. Push the Docker image to Docker Hub
+      - name: Push Docker image
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          # If you have tests, run them here (for example, using pytest)
-          pytest
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker push ${{ secrets.DOCKER_USERNAME }}/myapp:latest
 
-      # Deploy to Render
-      # Option 1: If your Render service is linked to GitHub, simply pushing changes triggers a deploy.
-      # Option 2: You can trigger a deploy using Render's API. For example:
->>>>>>> c92daf6 (hosting)
+      # 7. Trigger a deploy on Render using the Render API
       - name: Trigger Render Deploy
         env:
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
@@ -77,3 +58,29 @@ jobs:
           curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
             -H "Accept: application/json" \
             -H "Authorization: Bearer ${RENDER_API_KEY}"
+
+      # 8. Deploy to AWS via ECR/ECS (Optional - uncomment and adjust if needed)
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Build Docker image for AWS ECR
+        run: |
+          docker build -t myapp:latest .
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY }}
+
+      - name: Tag and push image to AWS ECR
+        run: |
+          docker tag myapp:latest ${{ secrets.AWS_ECR_REGISTRY }}/myapp:latest
+          docker push ${{ secrets.AWS_ECR_REGISTRY }}/myapp:latest
+
+      - name: Deploy to AWS ECS
+        run: |
+          echo "Deploying to AWS ECS..."
+          # Insert your ECS update commands here.
