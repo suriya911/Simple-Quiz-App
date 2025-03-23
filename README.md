@@ -1,4 +1,4 @@
-# 🧐 Simple Quiz App (Flask + SQLite + Docker + AWS)
+# 🤔 Simple Quiz App (Flask + SQLite + Docker + AWS)
 
 Welcome to **Simple Quiz App**, a dynamic, secure, and responsive web-based quiz platform built with **Flask** and **SQLite**, designed for learning, testing knowledge, and managing quizzes with ease. Experience seamless user and admin interactions with real-time score tracking and robust analytics!
 
@@ -6,8 +6,9 @@ Welcome to **Simple Quiz App**, a dynamic, secure, and responsive web-based quiz
 
 ## 🌐 Live Demo
 
-👉 Try it here: **[Simple Quiz App Live](https://simple-quiz-app-8fdd.onrender.com)**  
-_(Hosted via Render – auto-deployed from GitHub Actions)_
+👉 Try it here: **[Simple Quiz App (Render)](https://simple-quiz-app-8fdd.onrender.com)**  
+👉 Try it here: **[Simple Quiz App (AWS)](http://simple-quiz-env.eba-pjwgugz9.us-east-1.elasticbeanstalk.com/home)**  
+_(Hosted via Render & AWS Elastic Beanstalk – auto-deployed from GitHub Actions)_
 
 ---
 
@@ -21,7 +22,7 @@ _(Hosted via Render – auto-deployed from GitHub Actions)_
 - 📈 **Histogram + Normal Curve Visualization**
 - 📂 **Session Persistence** (SQLite + Flask-Session)
 - 🌙 **Responsive UI (Mobile + Desktop)**
-- 🪩 **Real-time Quiz Timer & Auto Submission**
+- 🩩 **Real-time Quiz Timer & Auto Submission**
 
 ---
 
@@ -47,18 +48,25 @@ _(Hosted via Render – auto-deployed from GitHub Actions)_
 +--------+----------+
          |
          v
-+--------+----------+          +--------------------------+
-|  AWS Load Balancer| -------> |  ECS Cluster (Flask App) |
-+--------+----------+          +--------------------------+
++----------------------------+
+| AWS Elastic Load Balancer |
++--------+-------------------+
          |
          v
 +----------------------------+
-|     Amazon ECR (Image)     |
-+----------------------------+
+| Elastic Beanstalk Service |
+| (Docker Container Host)   |
++--------+-------------------+
          |
          v
 +----------------------------+
-|     SQLite DB (EFS)        |
+|  EC2 Instance (Flask App)  |
+|  Running Gunicorn Server   |
++--------+-------------------+
+         |
+         v
++----------------------------+
+|  SQLite DB (Local Storage) |
 +----------------------------+
 ```
 
@@ -68,9 +76,9 @@ _(Hosted via Render – auto-deployed from GitHub Actions)_
 
 - 🔑 **Session Management:** Flask-Session with server-side session storage (SQLAlchemy).
 - 🚫 **Admin Protection:** Restricted `/admin` access, enforced role checks.
-- 🧫 **UUID Tokenization:** Prevent duplicate quiz submissions.
+- 🦫 **UUID Tokenization:** Prevent duplicate quiz submissions.
 - 🕵️ **Password Storage:** _[To be enhanced with hashing]_.
-- 🤍 **CSRF Prevention:** Form validation and token validation.
+- 🥷️ **CSRF Prevention:** Form validation and token validation.
 - 🔐 **CI/CD Secrets:** Docker Hub, Render, AWS credentials secured via GitHub Secrets.
 
 ---
@@ -168,7 +176,7 @@ Access: `http://localhost:5000`
 ## 🛫 Deployment (Render + AWS)
 
 - **Render:** Auto-deploys from GitHub via API.
-- **AWS:** Docker image pushed to **ECR**, deployed via **ECS** cluster.
+- **AWS:** Docker image pushed to **ECR**, deployed via **Elastic Beanstalk (Docker Host)**.
 - See **`.github/workflows/deploy.yml`** for CI/CD config.
 
 ---

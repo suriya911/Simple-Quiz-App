@@ -360,12 +360,9 @@ def view_results():
                            top_results=top_results,
                            graph_data=graph_data)
 
-@app.route('/health')
-def health_check():
-    return 'OK', 200
 
 if __name__ == '__main__':
     if not os.path.exists(DATABASE):
         init_db()
         insert_default_questions()
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
