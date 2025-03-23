@@ -22,13 +22,9 @@ app.config['SESSION_SQLALCHEMY'] = db
 
 Session(app)
 
-# -------------------
-# Jinja Filter to format date
-# -------------------
 @app.template_filter('format_date')
 def format_date(value, format='%d-%m-%Y %I:%M:%S %p'):
     try:
-        # Assuming the stored value is in the format 'YYYY-MM-DD HH:MM:SS'
         dt = datetime.datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
         return dt.strftime(format)
     except Exception as e:
@@ -144,7 +140,7 @@ def quiz():
             cur = db_conn.execute("SELECT * FROM questions ORDER BY RANDOM() LIMIT 20")
             questions = cur.fetchall()
             session['quiz_questions'] = [dict(q) for q in questions]
-            session['quiz_remaining_time'] = 300  # total duration in seconds
+            session['quiz_remaining_time'] = 300
             session['quiz_start_time'] = time.time()
         else:
             questions = session.get('quiz_questions')
@@ -162,9 +158,7 @@ def quiz():
                 if question and user_answer == question['correct_option']:
                     score += 1
 
-        total_duration = 300  # total quiz duration in seconds
-
-        # Get remaining time from the form; fallback to session if not provided.
+        total_duration = 300
         remaining_str = request.form.get('remaining_time')
         try:
             remaining = int(remaining_str) if remaining_str is not None else session.get('quiz_remaining_time', total_duration)
@@ -176,7 +170,6 @@ def quiz():
         session['quiz_score'] = score
         session['quiz_elapsed'] = quiz_taken_time
 
-        # Calculate local time for insertion
         local_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
             db_conn.execute(
@@ -184,33 +177,27 @@ def quiz():
                 (session['user_id'], score, quiz_taken_time, local_time)
             )
             db_conn.commit()
-            print("Quiz result inserted successfully with local time:", local_time)
         except Exception as e:
             print("Error inserting quiz result:", e)
             return jsonify({'error': 'Failed to store quiz result.'}), 500
 
-        # --- NEW CODE: Check for duplicate insertion and delete the last inserted duplicate ---
         cur = db_conn.execute(
             "SELECT COUNT(*) as cnt FROM results WHERE user_id = ? AND taken_at = ? AND score = ? AND time_taken = ?",
             (session['user_id'], local_time, score, quiz_taken_time)
         )
         cnt = cur.fetchone()['cnt']
         if cnt > 1:
-            # Delete the duplicate row (assumed to be the one with the highest id)
             db_conn.execute(
                 "DELETE FROM results WHERE id = (SELECT id FROM results WHERE user_id = ? AND taken_at = ? AND score = ? AND time_taken = ? ORDER BY id DESC LIMIT 1)",
                 (session['user_id'], local_time, score, quiz_taken_time)
             )
             db_conn.commit()
-            print("Duplicate quiz result deleted.")
-        # --- END NEW CODE ---
-        
+
         session.pop('quiz_start_time', None)
         session.pop('quiz_questions', None)
         session.pop('quiz_remaining_time', None)
 
         return jsonify({'score': score, 'elapsed_seconds': quiz_taken_time})
-
 
 @app.route('/update_quiz_state', methods=['POST'])
 def update_quiz_state():
@@ -311,7 +298,6 @@ def view_results():
         return [dict(row) for row in rows]
 
     if session.get('is_admin'):
-        # For Admin: Get all results
         query_all = """
             SELECT r.score, r.taken_at, r.time_taken, u.username 
             FROM results r 
@@ -320,7 +306,6 @@ def view_results():
         """
         all_results = rows_to_dicts(db_conn.execute(query_all).fetchall())
 
-        # For Admin: Get best result (highest score, lowest time) per user (all users)
         admin_best_query = """
             SELECT username, score, time_taken, taken_at FROM (
               SELECT u.username, r.score, r.time_taken, r.taken_at,
@@ -341,7 +326,6 @@ def view_results():
         """
         graph_data = rows_to_dicts(db_conn.execute(graph_query).fetchall())
     else:
-        # For a normal user:
         user_id = session.get('user_id')
         query_all = """
             SELECT r.score, r.taken_at, r.time_taken, u.username 
@@ -352,7 +336,6 @@ def view_results():
         """
         all_results = rows_to_dicts(db_conn.execute(query_all, (user_id,)).fetchall())
 
-        # For a normal user: Get top 3 results
         user_top_query = """
             SELECT u.username, r.score, r.time_taken, r.taken_at
             FROM results r 
@@ -377,10 +360,12 @@ def view_results():
                            top_results=top_results,
                            graph_data=graph_data)
 
-
+@app.route('/health')
+def health_check():
+    return 'OK', 200
 
 if __name__ == '__main__':
     if not os.path.exists(DATABASE):
         init_db()
-    insert_default_questions()
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+        insert_default_questions()
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
